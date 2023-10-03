@@ -39,10 +39,13 @@
         }
     }
 
-    function kek(e) {
+    function onKeyPress(e) {
         if (e.code === "KeyQ") {
             player.x = 28.6;
             player.y = 29;
+        }
+        if (e.code === "KeyR") {
+            localStorage.clear();
         }
     }
 
@@ -54,7 +57,7 @@
         document.addEventListener('touchstart', this.onTouch.bind(this), false);
         document.addEventListener('touchmove', this.onTouch.bind(this), false);
         document.addEventListener('touchend', this.onTouchEnd.bind(this), false);
-        document.addEventListener('keypress', (e) => kek(e));
+        document.addEventListener('keypress', (e) => onKeyPress(e));
     }
 
     Controls.prototype.onTouch = function (e) {
@@ -171,15 +174,23 @@
             ctx1.drawImage(bitmap, 0, 0, mapsizex, mapsizey);
             var data = ctx1.getImageData(0, 0, mapsizex, mapsizey).data;
             for (var i = 0; i < data.length; i += 4) {
+                // Red cell
                 if (data[i] > 200 && data[i + 1] < 200) {
                     wallGrid[i / 4] = 2;
                     continue;
                 }
+                // Blue cell
                 if (data[i] < 100 && data[i + 2] > 200) {
                     wallGrid[i / 4] = 3;
                     continue;
                 }
-                if (data[i + 0] < 200)
+                // Green cell
+                if (data[i] === 0 && data[i+1] === 255) {
+                    wallGrid[i / 4] = 3;
+                    continue;
+                }
+                // Black cell
+                if (data[i] < 200)
                     wallGrid[i / 4] = 1;
                 else
                     wallGrid[i / 4] = 0;
@@ -394,7 +405,6 @@
             var imageData = canvas.getContext("2d").createImageData(32, 32);
             var elem = mazeCacheParsed[i].data;
             for (var j = 0; j < Object.keys(elem).length; j++) {
-                var k = elem[j];
                 imageData.data[j] = elem[j];
             }
 

@@ -13,7 +13,7 @@ function isInsideCanvas(x, y) {
     return x >= 0 && x < mazeLen && y >= 0 && y < mazeHeight;
 }
 
-export function generateMaze(canvas, zalupa) {
+export function generateMaze(canvas, num) {
     const ctx = canvas.getContext('2d');
     ctx.imageSmoothingEnabled = false;
     ctx.clearRect(0, 0, 32, 32);
@@ -66,14 +66,27 @@ export function generateMaze(canvas, zalupa) {
         }
     }
 
+    const invisWallCount = Math.floor(Math.random() * 8);
     ctx.fillStyle = 'red';
+    for (let i = 0; i < invisWallCount; i++) {
+        while (true) {
+            let x = Math.floor(1 + Math.random() * (mazeLen - 3));
+            let y = Math.floor(1 + Math.random() * (mazeHeight - 3));
+            if ((x !== 1 || y !== 1) && (x !== mazeLen - 2 || y !== mazeHeight - 2) && maze[y][x]) {
+                ctx.fillRect(x, y, 1, 1);
+                break;
+            }
+        }
+    }
+
+    ctx.fillStyle = `rgb(0, 255, 0)`;
     ctx.fillRect(1, 1, 1, 1);
 
     ctx.fillStyle = 'blue';
     ctx.fillRect(mazeLen - 2, mazeHeight - 2, 1, 1);
     const buffer = ctx.getImageData(0, 0, 32, 32);
 
-    console.log(`Generated maze${zalupa}.png`);
+    console.log(`Generated maze${num}.png`);
 
     return buffer
 }
