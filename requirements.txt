@@ -1,2 +1,2 @@
 Cheetah3==3.2.5
-CherryPy==18.6.0
+CherryPy==18.8.0
