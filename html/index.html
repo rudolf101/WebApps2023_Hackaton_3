@@ -30,6 +30,9 @@
             maxLevel = currLevel;
             let newMaze = generateMaze(document.getElementById("maze"), currLevel);
             mazeCache[currLevel] = newMaze;
+            localStorage.setItem("currLevel", currLevel);
+            localStorage.setItem("maxLevel", maxLevel);
+            localStorage.setItem("mazeCache", JSON.stringify(mazeCache));
             return newMaze;
         } else {
             return mazeCache[currLevel];
@@ -106,6 +109,7 @@
         var dy = Math.sin(this.direction) * distance;
         if (map.get(this.x + dx, this.y) != 1) this.x += dx;
         if (map.get(this.x, this.y + dy) != 1) this.y += dy;
+        this.paces += distance;
         if (Math.abs(this.x - 29.5) < 0.5 && Math.abs(this.y - 29.5) < 0.5) {
             if (!recentEnd) {
                 this.x = 1.5;
@@ -114,7 +118,6 @@
                 currLevel++;
                 map.randomize(player);
                 this.paces = 0;
-                return;
             }
         } else recentEnd = false;
         if (currLevel > 0 && Math.abs(this.x - 1.5) < 0.5 && Math.abs(this.y - 0.5) < 1.5) {
@@ -125,11 +128,9 @@
                 currLevel--;
                 map.randomize(player);
                 this.paces = 0;
-                return;
             }
         } else recentStart = false;
-
-        this.paces += distance;
+        localStorage.setItem("player", JSON.stringify(player));
     };
 
     Player.prototype.update = function (controls, map, seconds) {
@@ -381,7 +382,29 @@
     else mapsize = mapsizey;
     var display = document.getElementById('display');
     var wallGrid = new Uint8Array(mapsizex * mapsizey);
+    if (localStorage.getItem("currLevel")) {
+        currLevel = localStorage.getItem("currLevel");
+        maxLevel = localStorage.getItem("maxLevel");
+        var mazeCacheParsed = JSON.parse(localStorage.getItem("mazeCache"))
+        for (var i = 0; i < mazeCacheParsed.length; i++) {
+            var canvas = document.getElementById("display1");
+            var imageData = canvas.getContext("2d").createImageData(32, 32);
+            var elem = mazeCacheParsed[i].data;
+            for (var j = 0; j < Object.keys(elem).length; j++) {
+                var k = elem[j];
+                imageData.data[j] = elem[j];
+            }
+
+            mazeCache[i] = imageData;
+        }
+    }
     var player = new Player(1.5, 1.5, Math.PI * 0.5);
+    var playerCache = JSON.parse(localStorage.getItem("player"));
+    if (playerCache) {
+        player.x = playerCache.x;
+        player.y = playerCache.y;
+        player.direction = playerCache.direction;
+    }
     var map = new Map(mapsize);
     var controls = new Controls();
     var camera = new Camera(display, MOBILE ? 160 : 160, Math.PI * 0.4);
