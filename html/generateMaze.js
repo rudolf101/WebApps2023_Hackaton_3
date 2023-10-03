@@ -6,16 +6,6 @@ const mazeLen = 31;
 const mazeHeight = 31;
 
 
-const canvas = createCanvas(32, 32);
-const ctx = canvas.getContext('2d');
-ctx.imageSmoothingEnabled = false;
-ctx.clearRect(0, 0, 32, 32);
-
-const maze = Array.from({length: mazeHeight}, () =>
-    Array.from({length: mazeLen}, () => false)
-);
-
-
 const directions = [
     {dx: -1, dy: 0},
     {dx: 1, dy: 0},
@@ -23,13 +13,20 @@ const directions = [
     {dx: 0, dy: 1},
 ];
 
-
 function isInsideCanvas(x, y) {
     return x >= 0 && x < mazeLen && y >= 0 && y < mazeHeight;
 }
 
+export function generateMaze(zalupa) {
+    const canvas = createCanvas(32, 32);
+    const ctx = canvas.getContext('2d');
+    ctx.imageSmoothingEnabled = false;
+    ctx.clearRect(0, 0, 32, 32);
 
-function generateMaze() {
+    const maze = Array.from({length: mazeHeight}, () =>
+        Array.from({length: mazeLen}, () => false)
+    );
+
     const stack = [];
     const startX = 1;
     const startY = 1;
@@ -65,29 +62,26 @@ function generateMaze() {
             currentY = y;
         }
     }
-}
 
-
-generateMaze();
-
-
-for (let y = 0; y < mazeHeight; y++) {
-    for (let x = 0; x < mazeLen; x++) {
-        if (maze[y][x]) ctx.fillStyle = 'white';
-        else ctx.fillStyle = 'black';
-        ctx.fillRect(x, y, 1, 1);
+    for (let y = 0; y < mazeHeight; y++) {
+        for (let x = 0; x < mazeLen; x++) {
+            if (maze[y][x]) ctx.fillStyle = 'white';
+            else ctx.fillStyle = 'black';
+            ctx.fillRect(x, y, 1, 1);
+        }
     }
+
+    ctx.fillStyle = 'red';
+    ctx.fillRect(1, 1, 1, 1);
+
+    ctx.fillStyle = 'blue';
+    ctx.fillRect(mazeLen - 2, mazeHeight - 2, 1, 1);
+
+    const buffer = canvas.toBuffer('image/png');
+    const p = `../public/levels/floor${zalupa}.png`;
+    fs.writeFileSync(p, buffer, {encoding: 'utf8', flag: 'w'});
+
+    console.log(`Generated maze${zalupa}.png`);
+
+    return p
 }
-
-
-ctx.fillStyle = 'red';
-ctx.fillRect(1, 1, 1, 1);
-
-ctx.fillStyle = 'blue';
-ctx.fillRect(mazeLen - 2, mazeHeight - 2, 1, 1);
-
-
-const buffer = canvas.toBuffer('image/png');
-fs.writeFileSync('../public/levels/floor.png', buffer, {encoding:'utf8',flag:'w'});
-
-console.log('Generated maze.png');
