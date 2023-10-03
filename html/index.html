@@ -60,7 +60,7 @@
         this.y = y;
         this.direction = direction;
         this.weapon = new Bitmap('/static/knife_hand.png', 200, 199);
-        this.weapon1 = new Bitmap('/static/floor.jpg', 200, 199);
+        this.weapon1 = new Bitmap('/static/floor.png', 200, 199);
         this.paces = 0;
     }
 
@@ -109,7 +109,7 @@
 
         var plan = new Image();
         plan.crossOrigin = "anonymous";
-        plan.src = '/static/floor.jpg';
+        plan.src = '/static/floor.png';
         plan.width = mapsizex;
         plan.height = mapsizey;
         size = 32;

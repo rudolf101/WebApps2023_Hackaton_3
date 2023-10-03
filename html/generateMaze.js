@@ -2,13 +2,14 @@ const {createCanvas} = require('canvas');
 const fs = require('fs');
 
 
-const mazeLen = 30;
-const mazeHeight = 30;
+const mazeLen = 31;
+const mazeHeight = 31;
 
 
 const canvas = createCanvas(32, 32);
 const ctx = canvas.getContext('2d');
 ctx.imageSmoothingEnabled = false;
+ctx.clearRect(0, 0, 32, 32);
 
 const maze = Array.from({length: mazeHeight}, () =>
     Array.from({length: mazeLen}, () => false)
@@ -31,7 +32,7 @@ function isInsideCanvas(x, y) {
 function generateMaze() {
     const stack = [];
     const startX = 1;
-    const startY = Math.floor(Math.random() * mazeHeight);
+    const startY = 1;
 
     let currentX = startX;
     let currentY = startY;
@@ -80,13 +81,13 @@ for (let y = 0; y < mazeHeight; y++) {
 
 
 ctx.fillStyle = 'red';
-ctx.fillRect(0, 0, 1, 1);
+ctx.fillRect(1, 1, 1, 1);
 
 ctx.fillStyle = 'blue';
-ctx.fillRect(mazeLen - 1, mazeHeight - 1, 1, 1);
+ctx.fillRect(mazeLen - 2, mazeHeight - 2, 1, 1);
 
 
-const buffer = canvas.toBuffer('image/jpeg');
-fs.writeFileSync('maze.jpg', buffer);
+const buffer = canvas.toBuffer('image/png');
+fs.writeFileSync('maze.png', buffer, {encoding:'utf8',flag:'w'});
 
-console.log('Generated maze.jpg');
+console.log('Generated maze.png');
