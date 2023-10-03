@@ -17,7 +17,7 @@ function isInsideCanvas(x, y) {
     return x >= 0 && x < mazeLen && y >= 0 && y < mazeHeight;
 }
 
-export function generateMaze(zalupa) {
+function generateMaze(zalupa) {
     const canvas = createCanvas(32, 32);
     const ctx = canvas.getContext('2d');
     ctx.imageSmoothingEnabled = false;
@@ -85,3 +85,5 @@ export function generateMaze(zalupa) {
 
     return p
 }
+
+exports.generateMaze = generateMaze
