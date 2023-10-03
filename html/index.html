@@ -6,32 +6,40 @@
 </head>
 <body style='background: #000; margin: 0; padding: 0'>
 <canvas id='display' width='1' height='1' style='width: 100%; height: 100%;'/>
+<canvas id='maze' width='32' height='32' style='width: 100%; height: 100%;'/>
+
 <div style="display:none;">
     <canvas id='display1' width='1' height='1'></canvas>
 </div>
+<script type="module" src="../static/generateMaze.js"></script>
 
-<script>
+<script type="module">
 
-    import {generateMaze} from "./generateMaze";
+    import {generateMaze} from "../static/generateMaze.js";
 
     var CIRCLE = Math.PI * 2;
     var MOBILE = /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent)
     var maxLevel = -1;
     var currLevel = 0;
+    var recentStart = true;
+    var recentEnd = false;
+    var mazeCache = [];
 
-    function getMaze(num) {
-        if (num > maxLevel) {
-            maxLevel = num;
-            return generateMaze(num);
+    function getMaze() {
+        if (currLevel > maxLevel) {
+            maxLevel = currLevel;
+            let newMaze = generateMaze(document.getElementById("maze"), currLevel);
+            mazeCache[currLevel] = newMaze;
+            return newMaze;
         } else {
-            return `../public/levels/floor${num}.png`;
+            return mazeCache[currLevel];
         }
     }
 
     function kek(e) {
         if (e.code === "KeyQ") {
-            getMaze(currLevel);
-            currLevel++;
+            player.x = 28;
+            player.y = 28;
         }
     }
 
@@ -69,8 +77,12 @@
     };
 
     function Bitmap(src, width, height) {
-        this.image = new Image();
-        this.image.src = src;
+        if (typeof src == "string") {
+            this.image = new Image();
+            this.image.src = src;
+        } else {
+            this.bitmap = src;
+        }
         this.width = width;
         this.height = height;
     }
@@ -81,7 +93,7 @@
         this.y = y;
         this.direction = direction;
         this.weapon = new Bitmap('/static/knife_hand.png', 200, 199);
-        this.weapon1 = new Bitmap('/static/floor.png', 200, 199);
+        createImageBitmap(getMaze()).then((res) => this.weapon1 = res)
         this.paces = 0;
     }
 
@@ -94,8 +106,29 @@
         var dy = Math.sin(this.direction) * distance;
         if (map.get(this.x + dx, this.y) != 1) this.x += dx;
         if (map.get(this.x, this.y + dy) != 1) this.y += dy;
-        if (Math.abs(this.x - 26.5) < 1 && Math.abs(this.y - 15) < 1)
-            window.location = "http://google.com";
+        if (Math.abs(this.x - 29.5) < 0.5 && Math.abs(this.y - 29.5) < 0.5) {
+            if (!recentEnd) {
+                this.x = 1.5;
+                this.y = 1.5;
+                recentStart = true;
+                currLevel++;
+                map.randomize(player);
+                this.paces = 0;
+                return;
+            }
+        } else recentEnd = false;
+        if (currLevel > 0 && Math.abs(this.x - 1.5) < 0.5 && Math.abs(this.y - 0.5) < 1.5) {
+            if (!recentStart) {
+                this.x = 29.5;
+                this.y = 29.5;
+                recentEnd = true;
+                currLevel--;
+                map.randomize(player);
+                this.paces = 0;
+                return;
+            }
+        } else recentStart = false;
+
         this.paces += distance;
     };
 
@@ -122,22 +155,18 @@
         return wallGrid[y * this.size + x];
     };
 
-    Map.prototype.randomize = function () {
+    Map.prototype.randomize = function (p) {
         var canvas1 = document.getElementById('display1');
         canvas1.width = mapsizex;
         canvas1.height = mapsizey;
         var ctx1 = canvas1.getContext('2d');
-
-        var plan = new Image();
-        plan.crossOrigin = "anonymous";
-        plan.src = '/static/floor.png';
-        plan.width = mapsizex;
-        plan.height = mapsizey;
-        size = 32;
-        plan.onload = function () {
-            ctx1.drawImage(plan, 0, 0, mapsizex, mapsizey);
-            data = ctx1.getImageData(0, 0, mapsizex, mapsizey).data;
-            for (i = 0; i < data.length; i += 4) {
+        var kek = getMaze()
+        var size = 32;
+        createImageBitmap(kek).then((bitmap) => {
+            p.weapon1 = new Bitmap(bitmap, 200, 199);
+            ctx1.drawImage(bitmap, 0, 0, mapsizex, mapsizey);
+            var data = ctx1.getImageData(0, 0, mapsizex, mapsizey).data;
+            for (var i = 0; i < data.length; i += 4) {
                 if (data[i] > 200 && data[i + 1] < 200) {
                     wallGrid[i / 4] = 2;
                     continue;
@@ -151,7 +180,10 @@
                 else
                     wallGrid[i / 4] = 0;
             }
-        }
+        })
+        // plan.onload = function () {
+
+        // }
     };
 
     Map.prototype.cast = function (point, angle, range) {
@@ -320,7 +352,7 @@
         var bobY = Math.sin(paces * 4) * this.scale * 0;
         var left = this.width * 0 + bobX;
         var top = this.height * 0 + bobY;
-        this.ctx.drawImage(weapon.image, left, top, weapon.width * this.scale, weapon.height * this.scale);
+        this.ctx.drawImage(weapon.bitmap, left, top, weapon.width * this.scale, weapon.height * this.scale);
     };
 
     function GameLoop() {
@@ -342,18 +374,19 @@
         requestAnimationFrame(this.frame);
     };
 
-    var mapsizex = 32;
-    var mapsizey = 32;
+    const mapsizex = 32;
+    const mapsizey = 32;
+    var mapsize;
     if (mapsizex > mapsizey) mapsize = mapsizex;
     else mapsize = mapsizey;
     var display = document.getElementById('display');
     var wallGrid = new Uint8Array(mapsizex * mapsizey);
-    var player = new Player(1.5, 2, Math.PI * 0.5);
+    var player = new Player(1.5, 1.5, Math.PI * 0.5);
     var map = new Map(mapsize);
     var controls = new Controls();
     var camera = new Camera(display, MOBILE ? 160 : 160, Math.PI * 0.4);
     var loop = new GameLoop();
-    map.randomize();
+    map.randomize(player);
     loop.start(function frame(seconds) {
         map.update(seconds);
         player.update(controls.states, map, seconds);

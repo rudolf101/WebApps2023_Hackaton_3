@@ -1,7 +1,3 @@
-const {createCanvas} = require('canvas');
-const fs = require('fs');
-
-
 const mazeLen = 31;
 const mazeHeight = 31;
 
@@ -17,8 +13,7 @@ function isInsideCanvas(x, y) {
     return x >= 0 && x < mazeLen && y >= 0 && y < mazeHeight;
 }
 
-export function generateMaze(zalupa) {
-    const canvas = createCanvas(32, 32);
+export function generateMaze(canvas, zalupa) {
     const ctx = canvas.getContext('2d');
     ctx.imageSmoothingEnabled = false;
     ctx.clearRect(0, 0, 32, 32);
@@ -76,12 +71,9 @@ export function generateMaze(zalupa) {
 
     ctx.fillStyle = 'blue';
     ctx.fillRect(mazeLen - 2, mazeHeight - 2, 1, 1);
-
-    const buffer = canvas.toBuffer('image/png');
-    const p = `../public/levels/floor${zalupa}.png`;
-    fs.writeFileSync(p, buffer, {encoding: 'utf8', flag: 'w'});
+    const buffer = ctx.getImageData(0, 0, 32, 32);
 
     console.log(`Generated maze${zalupa}.png`);
 
-    return p
+    return buffer
 }
