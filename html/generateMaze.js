@@ -88,6 +88,6 @@ ctx.fillRect(mazeLen - 2, mazeHeight - 2, 1, 1);
 
 
 const buffer = canvas.toBuffer('image/png');
-fs.writeFileSync('maze.png', buffer, {encoding:'utf8',flag:'w'});
+fs.writeFileSync('../public/levels/floor.png', buffer, {encoding:'utf8',flag:'w'});
 
 console.log('Generated maze.png');
