@@ -66,6 +66,7 @@ export function generateMaze(canvas, num) {
         }
     }
 
+    // Generate invisible walls
     const invisWallCount = Math.floor(Math.random() * 8);
     ctx.fillStyle = 'red';
     for (let i = 0; i < invisWallCount; i++) {
