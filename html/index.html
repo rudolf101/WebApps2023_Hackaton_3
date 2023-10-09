@@ -7,6 +7,18 @@
 <body style='background: #000; margin: 0; padding: 0'>
 <canvas id='display' width='1' height='1' style='width: 100%; height: 100%;'></canvas>
 <canvas id='maze' width='32' height='32' style='width: 100%; height: 100%;'></canvas>
+<div style="position: absolute;
+            top: 40px;
+            right: 0;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 20px;
+            border-radius: 10px;
+            color: white;
+            font-size: 24px;">
+    Level: <span id="level">0</span>
+</div>
+
 
 <div style="display:none;">
     <canvas id='display1' width='1' height='1'></canvas>
@@ -25,9 +37,11 @@
     let recentStart = localStorage.getItem("recentStart") ? localStorage.getItem("recentStart") : true;
     let recentEnd = localStorage.getItem("recentEnd") ? localStorage.getItem("recentEnd") : false;
     const mazeCache = [];
+    const levelElement = document.getElementById("level");
 
     function getMaze() {
         localStorage.setItem("currLevel", currLevel);
+        levelElement.textContent = (currLevel + 1).toString();
         if (currLevel > maxLevel) {
             maxLevel = currLevel;
             let newMaze = generateMaze(document.getElementById("maze"), currLevel);
@@ -413,8 +427,8 @@
     var wallGrid = new Uint8Array(mapsizex * mapsizey);
     if (localStorage.getItem("currLevel")) {
         hardMode = localStorage.getItem("hardMode") === "true";
-        currLevel = localStorage.getItem("currLevel");
-        maxLevel = localStorage.getItem("maxLevel");
+        currLevel = Number.parseInt(localStorage.getItem("currLevel"));
+        maxLevel =  Number.parseInt(localStorage.getItem("maxLevel"));
         var mazeCacheParsed = JSON.parse(localStorage.getItem("mazeCache"))
         for (var i = 0; i < mazeCacheParsed.length; i++) {
             var canvas = document.getElementById("display1");
